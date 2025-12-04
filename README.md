@@ -30,7 +30,7 @@ Add to `~/.cursor/mcp.json`:
       "args": [
         "-y",
         "tsx",
-        "https://raw.githubusercontent.com/arclabs561/img-mcp/main/src/index.ts"
+        "https://raw.githubusercontent.com/arclabs561/img-mcp/master/src/index.ts"
       ],
       "env": {
         "GEMINI_API_KEY": "your-api-key-here"
