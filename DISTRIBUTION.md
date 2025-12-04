@@ -173,7 +173,7 @@ To make it work immediately without publishing, update Cursor config to use tsx:
         "/Users/arc/Documents/dev/img-mcp/src/index.ts"
       ],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+        "GEMINI_API_KEY": "your-api-key-here"
       }
     }
   }

@@ -1,0 +1,44 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  schedule:
+    - cron: '0 0 * * 0' # Weekly
+
+jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for secret scanning
+    
+    - name: Check for secrets in git history
+      run: |
+        # Check for common API key patterns
+        PATTERNS=(
+          "AIzaSy[A-Za-z0-9_-]{35}"
+          "sk-[A-Za-z0-9]{32,}"
+          "xoxb-[0-9]{11,13}-[0-9]{11,13}-[A-Za-z0-9]{24,32}"
+          "ghp_[A-Za-z0-9]{36}"
+        )
+        
+        FOUND=0
+        for pattern in "${PATTERNS[@]}"; do
+          if git log --all --full-history -S "$pattern" --source -- "*" 2>/dev/null | grep -q .; then
+            echo "⚠️  Potential secret pattern found: $pattern"
+            FOUND=1
+          fi
+        done
+        
+        if [ $FOUND -eq 1 ]; then
+          echo "❌ Secrets may be in git history. Consider using git-filter-repo to remove them."
+          exit 1
+        fi
+        
+        echo "✅ No secrets found in git history"
+

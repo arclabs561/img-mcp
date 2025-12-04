@@ -99,7 +99,7 @@ You can still use the local path:
         "/Users/arc/Documents/dev/img-mcp/src/index.ts"
       ],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+        "GEMINI_API_KEY": "your-api-key-here"
       }
     }
   }

@@ -47,7 +47,7 @@ For local use:
         "/Users/arc/Documents/dev/img-mcp/src/index.ts"
       ],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+        "GEMINI_API_KEY": "your-api-key-here"
       }
     }
   }
@@ -69,7 +69,7 @@ If you've already built the project (`npm run build`), you can use:
         "/Users/arc/Documents/dev/img-mcp/dist/index.js"
       ],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+        "GEMINI_API_KEY": "your-api-key-here"
       }
     }
   }
@@ -127,7 +127,7 @@ Here's how your complete `~/.cursor/mcp.json` should look:
         "/Users/arc/Documents/dev/img-mcp/src/index.ts"
       ],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+        "GEMINI_API_KEY": "your-api-key-here"
       }
     }
   }

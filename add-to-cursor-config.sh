@@ -1,5 +1,5 @@
 #!/bin/bash
-# Helper script to add nano-banana-mcp to Cursor config
+# Helper script to add img-mcp to Cursor config
 
 CONFIG_FILE="$HOME/.cursor/mcp.json"
 PROJECT_DIR="/Users/arc/Documents/dev/img-mcp"
@@ -30,7 +30,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
       "command": "node",
       "args": ["/Users/arc/Documents/dev/img-mcp/dist/index.js"],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+        "GEMINI_API_KEY": "your-api-key-here"
       }
     }
   }
@@ -47,7 +47,7 @@ else
       "command": "node",
       "args": ["/Users/arc/Documents/dev/img-mcp/dist/index.js"],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+        "GEMINI_API_KEY": "your-api-key-here"
       }
     }
 EOFCONFIG

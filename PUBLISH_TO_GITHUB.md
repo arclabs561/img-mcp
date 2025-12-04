@@ -45,7 +45,7 @@ Once pushed, update your `~/.cursor/mcp.json`:
         "https://raw.githubusercontent.com/YOUR_USERNAME/img-mcp/main/src/index.ts"
       ],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+        "GEMINI_API_KEY": "your-api-key-here"
       }
     }
   }
