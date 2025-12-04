@@ -77,13 +77,48 @@ interface ImageMetadata {
 // ============================================================================
 
 class Logger {
+  private static sanitizeError(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error);
+    // Remove potential API key patterns and sensitive information
+    // Gemini API keys are typically 39 characters total (AIzaSy + 33 chars)
+    // Match any AIzaSy followed by 25+ alphanumeric/dash/underscore characters
+    return message
+      .replace(/AIzaSy[A-Za-z0-9_-]{25,}/g, '[API_KEY_REDACTED]')
+      .replace(/api[_-]?key[=:]\s*[^\s]+/gi, 'api_key=[REDACTED]')
+      .replace(/token[=:]\s*[^\s]+/gi, 'token=[REDACTED]')
+      .replace(/secret[=:]\s*[^\s]+/gi, 'secret=[REDACTED]');
+  }
+
+  private static sanitizeData(data: any): any {
+    if (!data) return data;
+    if (typeof data !== 'object') return data;
+    
+    const sanitized = { ...data };
+    const sensitiveKeys = ['apiKey', 'api_key', 'token', 'secret', 'password', 'geminiApiKey'];
+    
+    for (const key of sensitiveKeys) {
+      if (key in sanitized) {
+        sanitized[key] = '[REDACTED]';
+      }
+    }
+    
+    // Recursively sanitize nested objects
+    for (const [k, v] of Object.entries(sanitized)) {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        sanitized[k] = this.sanitizeData(v);
+      }
+    }
+    
+    return sanitized;
+  }
+
   private static log(level: string, message: string, data?: any) {
     const timestamp = new Date().toISOString();
     const logEntry = {
       timestamp,
       level,
       message,
-      ...(data && { data }),
+      ...(data && { data: this.sanitizeData(data) }),
     };
     // Write to stderr as per MCP best practices
     console.error(JSON.stringify(logEntry));
@@ -103,6 +138,11 @@ class Logger {
 
   static error(message: string, data?: any) {
     this.log("ERROR", message, data);
+  }
+
+  // Expose sanitizeError for use in error handling
+  static sanitizeErrorPublic(error: unknown): string {
+    return this.sanitizeError(error);
   }
 }
 
@@ -133,7 +173,8 @@ async function retryWithBackoff<T>(
       
       if (attempt < maxRetries) {
         const delay = initialDelay * Math.pow(2, attempt);
-        Logger.warn(`Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`, { error: lastError.message });
+        const sanitizedError = Logger['sanitizeError'](lastError);
+        Logger.warn(`Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`, { error: sanitizedError });
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
@@ -160,27 +201,30 @@ class PathValidator {
   }
 
   validateAndSanitize(filePath: string): string {
-    // Resolve to absolute path
-    const resolvedPath = path.resolve(filePath);
-    
-    // Check for directory traversal attempts
-    if (resolvedPath.includes('..')) {
+    // Check for directory traversal attempts BEFORE normalization
+    const normalized = path.normalize(filePath);
+    if (normalized.includes('..') || filePath.includes('..')) {
       throw new McpError(
         ErrorCode.InvalidParams,
-        `Path contains directory traversal: ${filePath}. Paths must be within allowed directories.`
+        `Path contains directory traversal. Paths must be within allowed directories.`
       );
     }
+    
+    // Resolve to absolute path
+    const resolvedPath = path.resolve(normalized);
 
-    // Check if path is within allowed directories
+    // Check if path is within allowed directories using path.relative for reliable containment check
     const isAllowed = this.allowedDirectories.some(allowedDir => {
       const resolvedAllowed = path.resolve(allowedDir);
-      return resolvedPath.startsWith(resolvedAllowed + path.sep) || resolvedPath === resolvedAllowed;
+      const relative = path.relative(resolvedAllowed, resolvedPath);
+      // If relative path doesn't start with .. and isn't absolute, it's contained
+      return !relative.startsWith('..') && !path.isAbsolute(relative);
     });
 
     if (!isAllowed) {
       throw new McpError(
         ErrorCode.InvalidParams,
-        `Path not allowed: ${filePath}. Must be within: ${this.allowedDirectories.join(', ')}`
+        `Path not allowed. Please use a path within the configured image directory.`
       );
     }
 
@@ -485,10 +529,12 @@ class ImgMcp {
         }
       } catch (error) {
         if (error instanceof McpError) {
-          Logger.error(`Tool error: ${request.params.name}`, { code: (error as any).code, message: error.message });
+          const sanitizedError = Logger.sanitizeErrorPublic(error);
+          Logger.error(`Tool error: ${request.params.name}`, { code: (error as any).code, message: sanitizedError });
           throw error;
         }
-        Logger.error(`Tool execution failed: ${request.params.name}`, { error: error instanceof Error ? error.message : String(error) });
+        const sanitizedError = Logger.sanitizeErrorPublic(error);
+        Logger.error(`Tool execution failed: ${request.params.name}`, { error: sanitizedError });
         throw new McpError(ErrorCode.InternalError, `Tool execution failed: ${error instanceof Error ? error.message : String(error)}`);
       }
     });
@@ -910,7 +956,7 @@ class ImgMcp {
           Logger.warn("Generated image exceeds size limit", { size: imageBuffer.length });
         }
 
-        await fs.writeFile(filePath, imageBuffer);
+        await fs.writeFile(filePath, imageBuffer, { mode: 0o600 });
         savedFiles.push(filePath);
         this.lastImagePath = filePath;
 
@@ -962,10 +1008,11 @@ class ImgMcp {
       return { content };
 
     } catch (error) {
-      Logger.error("Failed to generate image", { error: error instanceof Error ? error.message : String(error) });
+      const sanitizedError = Logger.sanitizeErrorPublic(error);
+      Logger.error("Failed to generate image", { error: sanitizedError });
       throw new McpError(
         ErrorCode.InternalError,
-        `Failed to generate image: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to generate image: ${sanitizedError}`
       );
     }
   }
@@ -1051,7 +1098,8 @@ class ImgMcp {
           });
           validatedReferenceImages.push(validatedRefPath);
         } catch (error) {
-          Logger.warn("Reference image not found or invalid", { path: refPath, error: error instanceof Error ? error.message : String(error) });
+          const sanitizedError = Logger.sanitizeErrorPublic(error);
+          Logger.warn("Reference image not found or invalid", { path: refPath, error: sanitizedError });
         }
       }
     }
@@ -1094,7 +1142,7 @@ class ImgMcp {
 
             if (part.inlineData.data) {
               const imageBuffer = Buffer.from(part.inlineData.data, 'base64');
-              await fs.writeFile(filePath, imageBuffer);
+              await fs.writeFile(filePath, imageBuffer, { mode: 0o600 });
               savedFiles.push(filePath);
               this.lastImagePath = filePath;
 
@@ -1154,7 +1202,8 @@ class ImgMcp {
       return { content };
 
     } catch (error) {
-      Logger.error("Failed to edit image", { error: error instanceof Error ? error.message : String(error) });
+      const sanitizedError = Logger.sanitizeErrorPublic(error);
+      Logger.error("Failed to edit image", { error: sanitizedError });
       throw new McpError(
         ErrorCode.InternalError,
         `Failed to edit image: ${error instanceof Error ? error.message : String(error)}`
@@ -1296,7 +1345,8 @@ class ImgMcp {
     try {
       await fs.unlink(metadata.filePath);
     } catch (error) {
-      Logger.warn("Failed to delete image file", { path: metadata.filePath, error: error instanceof Error ? error.message : String(error) });
+      const sanitizedError = Logger.sanitizeErrorPublic(error);
+      Logger.warn("Failed to delete image file", { path: metadata.filePath, error: sanitizedError });
     }
 
     // Remove from metadata
@@ -1517,14 +1567,14 @@ For the most secure setup, add this to your MCP configuration:
       const configToSave = this.configSource === 'environment' 
         ? { ...this.config, geminiApiKey: '[REDACTED]' }
         : this.config;
-      await fs.writeFile(configPath, JSON.stringify(configToSave, null, 2));
+      await fs.writeFile(configPath, JSON.stringify(configToSave, null, 2), { mode: 0o600 });
     }
   }
 
   private async saveMetadata(): Promise<void> {
     const metadataPath = path.join(this.getImagesDirectory(), '.metadata.json');
     const metadataArray = Array.from(this.imageMetadata.values());
-    await fs.writeFile(metadataPath, JSON.stringify(metadataArray, null, 2));
+    await fs.writeFile(metadataPath, JSON.stringify(metadataArray, null, 2), { mode: 0o600 });
   }
 
   private async loadMetadata(): Promise<void> {
@@ -1565,7 +1615,8 @@ For the most secure setup, add this to your MCP configuration:
         
         return;
       } catch (error) {
-        Logger.warn("Invalid API key in environment", { error: error instanceof Error ? error.message : String(error) });
+        const sanitizedError = Logger.sanitizeErrorPublic(error);
+        Logger.warn("Invalid API key in environment", { error: sanitizedError });
       }
     }
     
@@ -1601,6 +1652,7 @@ For the most secure setup, add this to your MCP configuration:
 
 const server = new ImgMcp();
 server.run().catch((error) => {
-  Logger.error("Fatal error starting server", { error: error instanceof Error ? error.message : String(error) });
+  const sanitizedError = Logger['sanitizeError'](error);
+  Logger.error("Fatal error starting server", { error: sanitizedError });
   process.exit(1);
 });

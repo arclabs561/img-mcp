@@ -12,6 +12,10 @@
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "test": "tsx test-integration.ts",
+    "test:security": "tsx test-security-direct.ts",
+    "test:security-e2e": "tsx test-security-e2e.ts",
+    "test:comprehensive": "tsx test-comprehensive-e2e.ts",
+    "test:all": "npm run test:security && npm run test:comprehensive",
     "prepare": "npm run build",
     "postinstall": "npm run build"
   },
@@ -23,7 +27,7 @@
     "image-generation",
     "image-editing"
   ],
-  "author": "",
+  "author": "arclabs561",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
