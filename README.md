@@ -1,6 +1,6 @@
 # img-mcp
 
-An enhanced MCP (Model Context Protocol) server for AI image generation and editing. Backend-agnostic design supporting multiple providers (currently Gemini/Imagen).
+MCP server for AI image generation and editing. Backend-agnostic design supporting multiple providers (currently Gemini/Imagen).
 
 ## ✨ Features
 
@@ -18,29 +18,7 @@ An enhanced MCP (Model Context Protocol) server for AI image generation and edit
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
-
-```bash
-npm install
-npm run build
-```
-
-### 2. Configure API Key
-
-**Option A: Environment Variable (Recommended)**
-```bash
-# Add to .env file
-GEMINI_API_KEY=your-api-key-here
-```
-
-Get your API key from: https://aistudio.google.com/app/apikey
-
-**Option B: Via Tool**
-Use the `configure_gemini_token` tool after starting the server.
-
-### 3. Configure MCP Client
-
-**Option A: From GitHub (Recommended for Distribution)**
+### Option 1: Use from GitHub (Recommended)
 
 Add to `~/.cursor/mcp.json`:
 
@@ -52,7 +30,7 @@ Add to `~/.cursor/mcp.json`:
       "args": [
         "-y",
         "tsx",
-        "https://raw.githubusercontent.com/YOUR_USERNAME/img-mcp/main/src/index.ts"
+        "https://raw.githubusercontent.com/arclabs561/img-mcp/main/src/index.ts"
       ],
       "env": {
         "GEMINI_API_KEY": "your-api-key-here"
@@ -62,12 +40,18 @@ Add to `~/.cursor/mcp.json`:
 }
 ```
 
-Replace `YOUR_USERNAME` with your GitHub username!
+Get your API key from: https://aistudio.google.com/app/apikey
 
-**Option B: Local Development**
+### Option 2: Local Development
 
-For local use:
+```bash
+git clone https://github.com/arclabs561/img-mcp.git
+cd img-mcp
+npm install
+echo "GEMINI_API_KEY=your-api-key" > .env
+```
 
+Then use in Cursor config:
 ```json
 {
   "mcpServers": {
@@ -84,34 +68,6 @@ For local use:
     }
   }
 }
-```
-
-**Option C: Published to npm**
-
-If published to npm:
-
-```json
-{
-  "mcpServers": {
-    "img-mcp": {
-      "command": "npx",
-      "args": ["-y", "img-mcp"],
-      "env": {
-        "GEMINI_API_KEY": "your-api-key-here"
-      }
-    }
-  }
-}
-```
-
-### 4. Test
-
-```bash
-# Run integration test
-npx tsx test-integration-complete.ts
-
-# Or start server directly
-npm start
 ```
 
 ## 📖 Available Tools
@@ -184,23 +140,18 @@ npm test
 npx tsx test-integration-complete.ts
 ```
 
-## 📋 Implementation Details
+## 📋 Supported Models
 
-This implementation includes all improvements from the gap analysis:
-
-✅ Resources capability for browsing images
-✅ Prompts capability for reusable templates
-✅ Security fixes (path validation, input sanitization)
-✅ Retry logic with exponential backoff
-✅ Image metadata tracking and persistence
-✅ Image management tools (list, search, delete)
-✅ Configuration options (model, format, quality)
-✅ Structured logging to stderr
-✅ Better error handling and categorization
-✅ Code organization and maintainability
-
-See `ANALYSIS.md` for detailed gap analysis and `IMPLEMENTATION_SUMMARY.md` for implementation details.
+- `gemini-2.5-flash-image-preview` - Fast, balanced quality
+- `gemini-3-pro-image-preview` - Highest quality (4K)
+- `gemini-2.0-flash-exp` - Experimental
+- `imagen-4.0-fast-generate-001` - Fast Imagen model
 
 ## 📝 License
 
 MIT
+
+## 🔗 Links
+
+- **Repository**: https://github.com/arclabs561/img-mcp
+- **Gemini API**: https://aistudio.google.com/app/apikey

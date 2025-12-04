@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "img-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "tsx",
+        "https://raw.githubusercontent.com/arclabs561/img-mcp/main/src/index.ts"
+      ],
+      "env": {
+        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+      }
+    }
+  }
+}
+
