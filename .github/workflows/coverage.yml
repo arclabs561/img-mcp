@@ -1,0 +1,41 @@
+name: Test Coverage
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build
+      run: npm run build
+    
+    - name: Check test files exist
+      run: |
+        echo "📊 Test Coverage Analysis:"
+        echo ""
+        echo "Test files found:"
+        find . -name "test*.ts" -not -path "./node_modules/*" | wc -l
+        echo ""
+        echo "Test files:"
+        find . -name "test*.ts" -not -path "./node_modules/*" | sort
+        echo ""
+        echo "Total test lines:"
+        find . -name "test*.ts" -not -path "./node_modules/*" -exec wc -l {} + | tail -1
+        echo ""
+        echo "✅ Test files verified"

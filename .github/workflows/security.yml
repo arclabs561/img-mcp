@@ -36,7 +36,13 @@ jobs:
         done
         
         if [ $FOUND -eq 1 ]; then
-          echo "❌ Secrets may be in git history. Consider using git-filter-repo to remove them."
+          echo "⚠️  WARNING: Secrets detected in git history!"
+          echo "📝 To remove secrets from history, use:"
+          echo "   pip install git-filter-repo"
+          echo "   git filter-repo --path-glob '*.json' --path-glob '*.md' --invert-paths --replace-text <(echo 'AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A==>your-api-key-here')"
+          echo ""
+          echo "⚠️  If this was a real API key, rotate it immediately!"
+          echo "⚠️  This check will fail until secrets are removed from history."
           exit 1
         fi
         

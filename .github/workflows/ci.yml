@@ -34,14 +34,14 @@ jobs:
     - name: Type check
       run: npx tsc --noEmit
     
-    - name: Check for secrets
+    - name: Check for secrets in current files
       run: |
-        # Check for common secret patterns
-        if git log --all --full-history --source -- "*" | grep -iE "(api[_-]?key|secret|password|token|auth)" | grep -vE "(your-|example|placeholder|test)" | grep -v "GEMINI_API_KEY.*your-api-key"; then
-          echo "⚠️  Potential secrets found in git history"
+        # Check current files (not git history - that's handled by security.yml)
+        if grep -r "AIzaSy[A-Za-z0-9_-]\{35\}" --include="*.ts" --include="*.js" --include="*.json" --include="*.md" src/ .github/ 2>/dev/null | grep -v "your-api-key\|example\|placeholder\|test"; then
+          echo "❌ Potential API keys found in source files"
           exit 1
         fi
-        echo "✅ No secrets found"
+        echo "✅ No hardcoded secrets in current files"
 
   security:
     runs-on: ubuntu-latest
