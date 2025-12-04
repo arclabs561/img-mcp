@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "img-mcp": {
+      "command": "node",
+      "args": [
+        "/Users/arc/Documents/dev/img-mcp/dist/index.js"
+      ],
+      "env": {
+        "GEMINI_API_KEY": "AIzaSyAM6FE4xyyX0cGwam-AlVDSv3cr514OK9A"
+      }
+    }
+  }
+}
+

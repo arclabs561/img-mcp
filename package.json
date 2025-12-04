@@ -1,0 +1,50 @@
+{
+  "name": "img-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for AI image generation and editing",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "img-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "tsx test-integration.ts",
+    "prepare": "npm run build",
+    "postinstall": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "image-generation",
+    "gemini",
+    "image-generation",
+    "image-editing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@google/genai": "^1.31.0",
+    "zod": "^3.23.8",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.16.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.12",
+    "typescript": "^5.5.4"
+  },
+  "files": [
+    "dist",
+    "src",
+    "package.json",
+    "tsconfig.json",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

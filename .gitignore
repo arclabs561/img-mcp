@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.log
+.env
+.img-mcp-config.json
+generated_imgs/
+test_output/
+*.png
+*.jpg
+*.jpeg
+*.webp
+.DS_Store
+.env.*
+*.test.js
+*.test.ts
+

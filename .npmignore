@@ -1,0 +1,15 @@
+src/
+test-integration.ts
+tsconfig.json
+.eslintrc.json
+.env.example
+.gitignore
+*.log
+.DS_Store
+generated_imgs/
+*.png
+*.jpg
+*.jpeg
+*.webp
+.nano-banana-config.json
+
