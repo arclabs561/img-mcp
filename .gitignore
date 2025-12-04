@@ -13,4 +13,5 @@ test_output/
 .env.*
 *.test.js
 *.test.ts
+archive/
 
